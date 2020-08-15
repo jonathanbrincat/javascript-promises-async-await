@@ -2,30 +2,27 @@ import {
   fetchWithTimeout,
   fetchMovies,
   fetchBooks,
-  asyncFetchBooks,
   asyncFetchMovies,
+  asyncFetchBooks,
 } from "./services";
 const movies = require("./data/movies.json");
 
-const getBooksAndMovies = () => {
+function getBooksAndMovies() {
   return Promise.all([fetchBooks(), fetchMovies()])
-    .then(([books, movies]) => ({
-      books,
-      movies,
-    }))
+    .then(([books, movies]) => ({ books, movies }))
     .catch((error) => console.log("Error fetching books and movies", error));
-};
+}
+
 const getBooksAndMoviesPromise = getBooksAndMovies();
 getBooksAndMoviesPromise.then((results) => {
   console.log("getBooksAndMoviesPromise", results);
 });
 
+// Race condition
 function getBooksOrMovies() {
   return Promise.race([fetchBooks(), fetchMovies()])
     .then((results) => results)
-    .catch((error) => {
-      console.log("Error waiting for the promise race", error);
-    });
+    .catch((error) => console.log("Error waiting for the promise race", error));
 }
 
 const getBooksOrMoviesPromise = getBooksOrMovies();
@@ -39,10 +36,7 @@ async function getBooksAndMoviesAsync() {
       asyncFetchBooks(),
       asyncFetchMovies(),
     ]);
-    return {
-      books,
-      movies,
-    };
+    return { books, movies };
   } catch (error) {
     console.log("Error fetching books and movies", error);
     return error;
@@ -50,8 +44,13 @@ async function getBooksAndMoviesAsync() {
 }
 
 async function getBooksOrMoviesAsync() {
+  //   try {
   const values = await Promise.race([asyncFetchBookss(), asyncFetchMovies()]);
   return values;
+  //   } catch (error) {
+  //     console.error("Error waiting for the promise race", error);
+  //     throw error;
+  //   }
 }
 
 getBooksAndMoviesAsync()
